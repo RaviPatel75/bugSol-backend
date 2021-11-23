@@ -5,10 +5,10 @@
     <div class="row">
         <div class="col-lg-12 margin-tb">
             <div class="pull-left">
-                <h2>Edit Project</h2>
+                <h2>Edit Product</h2>
             </div>
             <div class="pull-right">
-                <a class="btn btn-primary" href="{{ route('project.index') }}"> Back</a>
+                <a class="btn btn-primary" href="{{ route('products.index') }}"> Back</a>
             </div>
         </div>
     </div>
@@ -26,21 +26,22 @@
     @endif
 
 
-    {!! Form::model($project, ['method' => 'PATCH','route' => ['project.update', $project->id]]) !!}
-    {{-- <form action="{{ route('project.update',$project->id) }}" method="POST"> --}}
-    	{{-- @csrf --}}
-        {{-- @method('PUT') --}}
+    <form action="{{ route('products.update',$product->id) }}" method="POST">
+    	@csrf
+        @method('PUT')
 
 
          <div class="row">
 		    <div class="col-xs-12 col-sm-12 col-md-12">
 		        <div class="form-group">
 		            <strong>Name:</strong>
-                    {!! Form::text('name', null, array('placeholder' => 'Name','class' => 'form-control')) !!}
+		            <input type="text" name="name" value="{{ $product->name }}" class="form-control" placeholder="Name">
 		        </div>
-                <div class="form-group">
-		            <strong>Assign to Users:</strong>
-                    {!! Form::select('users[]', $users,$assignedUsers, array('class' => 'form-control','multiple')) !!}
+		    </div>
+		    <div class="col-xs-12 col-sm-12 col-md-12">
+		        <div class="form-group">
+		            <strong>Detail:</strong>
+		            <textarea class="form-control" style="height:150px" name="detail" placeholder="Detail">{{ $product->detail }}</textarea>
 		        </div>
 		    </div>
 		    <div class="col-xs-12 col-sm-12 col-md-12 text-center">
@@ -49,6 +50,6 @@
 		</div>
 
 
-    {{-- </form> --}}
-    {!! Form::close() !!}
+    </form>
+
 @endsection

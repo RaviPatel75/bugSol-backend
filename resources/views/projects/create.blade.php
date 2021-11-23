@@ -26,23 +26,25 @@
     @endif
 
 
-    <form action="{{ route('project.store') }}" method="POST">
-    	@csrf
+    {!! Form::open(array('route' => 'project.store','method'=>'POST')) !!}
+    
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <div class="form-group">
+                <strong>Name:</strong>
+                {!! Form::text('name', null, array('placeholder' => 'Name','class' => 'form-control')) !!}
+            </div>
+            <div class="form-group">
+                <strong>Assign to Users:</strong>
+                {!! Form::select('users[]', $users,[], array('class' => 'form-control','multiple')) !!}
+            </div>
+            
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
+                <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
 
-
-         <div class="row">
-		    <div class="col-xs-12 col-sm-12 col-md-12">
-		        <div class="form-group">
-		            <strong>Name:</strong>
-		            <input type="text" name="name" class="form-control" placeholder="Name">
-		        </div>
-		    </div>
-		    <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-		            <button type="submit" class="btn btn-primary">Submit</button>
-		    </div>
-		</div>
-
-
-    </form>
+    {!! Form::close() !!}
 
 @endsection

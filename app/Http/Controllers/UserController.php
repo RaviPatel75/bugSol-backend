@@ -28,10 +28,13 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+        $userId = (Auth::user()->roles[0]->name != 'Super Admin') ? Auth::user()->id : '0';
 
         if ($isSuperAdmin)
         {
-            $data = User::orderBy('id','DESC')->paginate(5);
+            $data = User::orderBy('id','DESC')
+                    ->where('created_by','=',$userId)
+                    ->paginate(5);
         }
         else
         {
@@ -39,10 +42,10 @@ class UserController extends Controller
                         ->whereHas('roles', function ($query) {
                             $query->where('name','!=', 'Super Admin');
                         })
+                        ->where('created_by','=',$userId)
                         ->paginate(5);
         }
 
-        // $data = User::orderBy('id','DESC')->paginate(5);
         return view('users.index',compact('data'))
             ->with('i', ($request->input('page', 1) -1) * 5);
     }
@@ -92,6 +95,18 @@ class UserController extends Controller
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
 
+        // add one field of created_by
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+
+        if ($isSuperAdmin)
+        {
+            $input['created_by'] = '0';
+        }
+        else
+        {
+            $input['created_by'] = Auth::user()->id;
+        }
+        // dd($input);
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
 
@@ -119,8 +134,39 @@ class UserController extends Controller
      */
     public function edit($id)
     {
+
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+
+        if ($isSuperAdmin)
+        {
+            $data = User::orderBy('id','DESC')->paginate(5);
+        }
+        else
+        {
+            $data = User::orderBy('id','DESC')
+                        ->whereHas('roles', function ($query) {
+                            $query->where('name','!=', 'Super Admin');
+                        })
+                        ->paginate(5);
+        }
+        
         $user = User::find($id);
-        $roles = Role::pluck('name','name')->all();
+        $hasPermission = Auth::user()->hasPermissionTo('user-edit');
+
+        if ($hasPermission && $isSuperAdmin)
+        {
+            $roles = Role::pluck('name','name')->all();
+        }
+        else
+        {
+            $roles = array();
+            $rolesQueryData = Role::where('name','!=', 'Super Admin')->get();
+            foreach($rolesQueryData as $data)
+            {
+                $roles[$data->name] = $data->name;
+            }
+        }
+
         $userRole = $user->roles->pluck('name','name')->all();
     
         return view('users.edit',compact('user','roles','userRole'));

@@ -11,9 +11,9 @@
                 @can('project-create')
                 <a class="btn btn-success" href="{{ route('project.create') }}"> Create New Project</a>
                 @endcan
-                @can('project-edit')
+                {{-- @can('project-edit')
                 <a class="btn btn-success" href="{{ route('project_access.index') }}"> Assign user to the project</a>
-                @endcan
+                @endcan --}}
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
         <tr>
             <th>No</th>
             <th>Name</th>
-            <th width="280px">Action</th>
+            <th width="300px">Action</th>
         </tr>
 	    @foreach ($projects as $project)
 	    <tr>
@@ -39,6 +39,7 @@
 	        <td>
                 <form action="{{ route('project.destroy',$project->id) }}" method="POST">
                     <a class="btn btn-info" href="{{ route('project.show',$project->id) }}">Show</a>
+                    <a class="btn btn-info" href="{{ route('kanban.show',$project->id) }}">Kanban</a>
                     @can('project-edit')
                     <a class="btn btn-primary" href="{{ route('project.edit',$project->id) }}">Edit</a>
                     @endcan
