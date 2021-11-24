@@ -10,6 +10,7 @@ use DB;
 use Hash;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Lang;
 
 class UserController extends Controller
 {
@@ -30,14 +31,11 @@ class UserController extends Controller
         $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
         $userId = (Auth::user()->roles[0]->name != 'Super Admin') ? Auth::user()->id : '0';
 
-        if ($isSuperAdmin)
-        {
+        if ($isSuperAdmin) {
             $data = User::orderBy('id','DESC')
                     ->where('created_by','=',$userId)
                     ->paginate(5);
-        }
-        else
-        {
+        } else {
             $data = User::orderBy('id','DESC')
                         ->whereHas('roles', function ($query) {
                             $query->where('name','!=', 'Super Admin');
@@ -60,12 +58,9 @@ class UserController extends Controller
         $hasPermission = Auth::user()->hasPermissionTo('user-create');
         $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
         
-        if ($hasPermission && $isSuperAdmin)
-        {
+        if ($hasPermission && $isSuperAdmin) {
             $roles = Role::pluck('name','name')->all();
-        }
-        else
-        {
+        } else {
             $roles = array();
             $rolesQueryData = Role::where('name','!=', 'Super Admin')->get();
             foreach($rolesQueryData as $data)
@@ -98,20 +93,17 @@ class UserController extends Controller
         // add one field of created_by
         $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
 
-        if ($isSuperAdmin)
-        {
+        if ($isSuperAdmin) {
             $input['created_by'] = '0';
-        }
-        else
-        {
+        } else {
             $input['created_by'] = Auth::user()->id;
         }
-        // dd($input);
+        
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
 
         return redirect()->route('users.index')
-                        ->with('success','User created successfully');
+                        ->with('success',Lang::get('user.created'));
     }
 
     /**
@@ -137,12 +129,9 @@ class UserController extends Controller
 
         $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
 
-        if ($isSuperAdmin)
-        {
+        if ($isSuperAdmin) {
             $data = User::orderBy('id','DESC')->paginate(5);
-        }
-        else
-        {
+        } else {
             $data = User::orderBy('id','DESC')
                         ->whereHas('roles', function ($query) {
                             $query->where('name','!=', 'Super Admin');
@@ -153,12 +142,9 @@ class UserController extends Controller
         $user = User::find($id);
         $hasPermission = Auth::user()->hasPermissionTo('user-edit');
 
-        if ($hasPermission && $isSuperAdmin)
-        {
+        if ($hasPermission && $isSuperAdmin) {
             $roles = Role::pluck('name','name')->all();
-        }
-        else
-        {
+        } else {
             $roles = array();
             $rolesQueryData = Role::where('name','!=', 'Super Admin')->get();
             foreach($rolesQueryData as $data)
@@ -202,7 +188,7 @@ class UserController extends Controller
         $user->assignRole($request->input('roles'));
     
         return redirect()->route('users.index')
-                        ->with('success','User updated successfully');
+                        ->with('success',Lang::get('user.updated'));
     }
 
     /**
@@ -215,6 +201,6 @@ class UserController extends Controller
     {
         User::find($id)->delete();
         return redirect()->route('users.index')
-                        ->with('success','User deleted successfully');
+                        ->with('success',Lang::get('user.deleted'));
     }
 }

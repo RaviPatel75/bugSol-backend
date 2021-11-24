@@ -7,8 +7,8 @@ use App\Models\ProjectAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-// use App\Http\Controllers\DB;
 use DB;
+use Lang;
 
 class ProjectController extends Controller
 {
@@ -62,10 +62,10 @@ class ProjectController extends Controller
 
         foreach($usersAssigned as $assignUser)
         {
-            $projectAccessData = array(
+            $projectAccessData = [
                 'project_id' => $projectId,
                 'user_id' => $assignUser
-            );
+            ];
 
             ProjectAccess::create($projectAccessData);
 
@@ -73,7 +73,7 @@ class ProjectController extends Controller
         }
 
         return redirect()->route('project.index')
-                        ->with('success','Project created successfully.');
+                        ->with('success',Lang::get('project.password'));
     }
 
     /**
@@ -132,10 +132,10 @@ class ProjectController extends Controller
 
         foreach($usersAssigned as $assignUser)
         {
-            $projectAccessData = array(
+            $projectAccessData = [
                 'project_id' => $projectId,
                 'user_id' => $assignUser
-            );
+            ];
 
             ProjectAccess::create($projectAccessData);
 
@@ -143,7 +143,7 @@ class ProjectController extends Controller
         }
     
         return redirect()->route('project.index')
-                        ->with('success','Project updated successfully');
+                        ->with('success',Lang::get('project.update'));
     }
 
     /**
@@ -160,6 +160,6 @@ class ProjectController extends Controller
         ProjectAccess::where('project_id',$projectId)->delete();
     
         return redirect()->route('project.index')
-                        ->with('success','Project deleted successfully');
+                        ->with('success',Lang::get('project.deleted'));
     }
 }

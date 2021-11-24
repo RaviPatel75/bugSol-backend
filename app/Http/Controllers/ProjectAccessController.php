@@ -22,7 +22,7 @@ class ProjectAccessController extends Controller
      */
     public function index()
     {
-        dd("test");
+        // dd("test");
     }
 
     /**

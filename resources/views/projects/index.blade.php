@@ -11,9 +11,6 @@
                 @can('project-create')
                 <a class="btn btn-success" href="{{ route('project.create') }}"> Create New Project</a>
                 @endcan
-                {{-- @can('project-edit')
-                <a class="btn btn-success" href="{{ route('project_access.index') }}"> Assign user to the project</a>
-                @endcan --}}
             </div>
         </div>
     </div>
