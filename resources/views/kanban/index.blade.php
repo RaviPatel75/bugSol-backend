@@ -42,6 +42,7 @@
 
         .task-grid th:first-child {
             border-left: 1px;
+            width: 200px;
         }
 
         .task-grid tr:last-child {

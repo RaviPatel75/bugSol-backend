@@ -28,6 +28,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $hasPermission = Auth::user()->hasPermissionTo('user-create');
         $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
         $userId = (Auth::user()->roles[0]->name != 'Super Admin') ? Auth::user()->id : '0';
 
@@ -43,8 +44,19 @@ class UserController extends Controller
                         ->where('created_by','=',$userId)
                         ->paginate(5);
         }
+        
+        if ($hasPermission && $isSuperAdmin) {
+            $roles = Role::pluck('name','name')->all();
+        } else {
+            $roles = array();
+            $rolesQueryData = Role::where('name','!=', 'Super Admin')->get();
+            foreach($rolesQueryData as $role_data)
+            {
+                $roles[$role_data->name] = $role_data->name;
+            }
+        }
 
-        return view('users.index',compact('data'))
+        return view('users.index',compact('data','roles'))
             ->with('i', ($request->input('page', 1) -1) * 5);
     }
 

@@ -26,8 +26,10 @@ class ProjectController extends Controller
      */
     public function index()
     {
+        $userId = Auth::user()->id;
+        $users = User::where('created_by','=',$userId)->pluck('name','id');
         $projects = Project::latest()->paginate(5);
-        return view('projects.index',compact('projects'))
+        return view('projects.index',compact('projects','users'))
             ->with('i', (request()->input('page', 1) - 1) * 5);
     }
 
