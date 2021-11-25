@@ -54,7 +54,7 @@
                     </td>
                     <td>
                         <a class="btn btn-info" href="{{ route('users.show',$user->id) }}">Show</a>
-                        <a class="btn btn-primary" href="{{ route('users.edit',$user->id) }}">Edit</a>
+                        <a class="btn btn-primary edit_user" href="javascript:void(0)" data-id="{{ $user->id }}">Edit</a>
                         {!! Form::open(['method' => 'DELETE','route' => ['users.destroy', $user->id],'style'=>'display:inline']) !!}
                         {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
                         {!! Form::close() !!}
@@ -67,62 +67,42 @@
 
     {!! $data->render() !!}
 
-    <div class="modal fade" id="ajaxModel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="modelHeading">Create User</h4>
-                </div>
-    
-                <div class="modal-body">
-                    {!! Form::open(array('route' => 'users.store','method'=>'POST')) !!}
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <div class="form-group">
-                                <strong>Name:</strong>
-                                {!! Form::text('name', null, array('placeholder' => 'Name','class' => 'form-control')) !!}
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <div class="form-group">
-                                <strong>Email:</strong>
-                                {!! Form::text('email', null, array('placeholder' => 'Email','class' => 'form-control')) !!}
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <div class="form-group">
-                                <strong>Password:</strong>
-                                {!! Form::password('password', array('placeholder' => 'Password','class' => 'form-control')) !!}
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <div class="form-group">
-                                <strong>Confirm Password:</strong>
-                                {!! Form::password('confirm-password', array('placeholder' => 'Confirm Password','class' => 'form-control')) !!}
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <div class="form-group">
-                                <strong>Role:</strong>
-                                {!! Form::select('roles[]', $roles,[], array('class' => 'form-control','multiple')) !!}
-                            </div>
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    </div>
-                    {!! Form::close() !!}
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="user-form"></div>
 
 @endsection
 
 @section('javascript')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
+
     <script>
         $(document).on('click','.create_user', function(){
-            $("#ajaxModel").modal("show");
+            $.get(
+                "{{ route("users.create") }}",
+                function (data) {
+                    $('.user-form').html(data);
+                    $("#ajaxModel").modal("show");
+                    $('.select2-multiple').select2({
+                        width: "100%",
+                        placeholder: "Select",
+                        allowClear: true
+                    });
+                }
+            );
+        });
+        $(document).on('click','.edit_user', function(){
+            var user_id = $(this).data("id");
+            $.get(
+                "{{ route("users.index") }}"+"/"+user_id+"/edit",
+                function (data) {
+                    $('.user-form').html(data);
+                    $("#ajaxModel").modal("show");
+                    $('.select2-multiple').select2({
+                        width: "100%",
+                        placeholder: "Select",
+                        allowClear: true
+                    });
+                }
+            );
         });
     </script>
 @endsection

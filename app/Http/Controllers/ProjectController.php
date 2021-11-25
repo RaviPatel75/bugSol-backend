@@ -26,10 +26,8 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $userId = Auth::user()->id;
-        $users = User::where('created_by','=',$userId)->pluck('name','id');
         $projects = Project::latest()->paginate(5);
-        return view('projects.index',compact('projects','users'))
+        return view('projects.index',compact('projects'))
             ->with('i', (request()->input('page', 1) - 1) * 5);
     }
 
@@ -41,7 +39,12 @@ class ProjectController extends Controller
     public function create()
     {
         $userId = Auth::user()->id;
-        $users = User::where('created_by','=',$userId)->pluck('name','id');
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+        if ($isSuperAdmin) {
+            $users = User::pluck('name','id')->all();
+        } else {
+            $users = User::where('created_by','=',$userId)->pluck('name','id');
+        }
         return view('projects.create',compact('users'));
     }
 
@@ -103,13 +106,25 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        $users = User::where('created_by','=',Auth::user()->id)->pluck('name','id');
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+        if ($isSuperAdmin) {
+            $users = User::pluck('name','id')->all();
+        } else {
+            $users = User::where('created_by','=',Auth::user()->id)->pluck('name','id');
+        }
         $assignedUsers = ProjectAccess::leftjoin('users',function($join) {
                                     $join->on('project_access.user_id','=','users.id');
                                 })
                                 ->where('project_access.project_id','=',$project->id)
                                 ->pluck('users.id');
 
+        $response_data = [
+            'project' => $project,
+            'users' => $users,
+            'assignedUsers' => $assignedUsers
+        ];
+
+        // return response()->json($response_data);
         return view('projects.edit',compact('project','users','assignedUsers'));
     }
 

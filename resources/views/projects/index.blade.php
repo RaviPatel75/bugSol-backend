@@ -54,14 +54,14 @@
                     <a class="btn btn-info" href="{{ route('project.show',$project->id) }}">Show</a>
                     <a class="btn btn-info" href="{{ route('kanban.show',$project->id) }}">Kanban</a>
                     @can('project-edit')
-                    <a class="btn btn-primary" href="{{ route('project.edit',$project->id) }}">Edit</a>
+                        <a class="btn btn-primary edit_project" href="javascript:void(0)" data-id="{{ $project->id }}">Edit</a>
                     @endcan
 
 
                     @csrf
                     @method('DELETE')
                     @can('project-delete')
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                        <button class="btn btn-danger">Delete</button>
                     @endcan
                 </form>
 	        </td>
@@ -72,45 +72,43 @@
 
     {!! $projects->links() !!}
 
-    <div class="modal fade" id="ajaxModel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="modelHeading"></h4>
-                </div>
-    
-                <div class="modal-body">
-                    {!! Form::open(array('route' => 'project.store','method'=>'POST')) !!}
-    
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <div class="form-group">
-                                <strong>Name:</strong>
-                                {!! Form::text('name', null, array('placeholder' => 'Name','class' => 'form-control')) !!}
-                            </div>
-                            <div class="form-group">
-                                <strong>Assign to Users:</strong>
-                                {!! Form::select('users[]', $users,[], array('class' => 'form-control','multiple')) !!}
-                            </div>
-                            
-                        </div>
-                        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    </div>
-
-                    {!! Form::close() !!}
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <div class="project-form"></div>
 @endsection
 
 @section('javascript')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
+
     <script>
         $(document).on('click','.create_project', function(){
-            $("#ajaxModel").modal("show");
+            $.get(
+                "{{ route("project.create") }}",
+                function (data) {
+                    $('.project-form').html(data);
+                    $("#ajaxModel").modal("show");
+                    $('.select2-multiple').select2({
+                        width: "100%",
+                        placeholder: "Select",
+                        allowClear: true
+                    });
+                }
+            );
+        });
+
+        $(document).on('click','.edit_project', function(){
+            var project_id = $(this).data("id");
+
+            $.get(
+                "{{ route("project.index") }}" + "/" + project_id + "/edit",
+                function (data) {
+                    $('.project-form').html(data);
+                    $("#ajaxModel").modal("show");
+                    $('.select2-multiple').select2({
+                        width: "100%",
+                        placeholder: "Select",
+                        allowClear: true
+                    });
+                }
+            );
         });
     </script>
 @endsection

@@ -7,6 +7,14 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 @endsection
 
+@section('css')
+    <script>
+        span.select2.select2-container.select2-container--default.select2-container--focus {
+            width: 100% !important;
+        }
+    </script>
+@endsection
+
 @section('content')
 <div class="row">
     <div class="col-lg-12 margin-tb">
@@ -42,7 +50,7 @@
         <td>
             <a class="btn btn-info" href="{{ route('roles.show',$role->id) }}">Show</a>
             @can('role-edit')
-                <a class="btn btn-primary" href="{{ route('roles.edit',$role->id) }}">Edit</a>
+                <a class="btn btn-primary edit_role" href="javascript:void(0)" data-id="{{ $role->id }}">Edit</a>
             @endcan
             @can('role-delete')
                 {!! Form::open(['method' => 'DELETE','route' => ['roles.destroy', $role->id],'style'=>'display:inline']) !!}
@@ -57,50 +65,43 @@
 
 {!! $roles->render() !!}
 
-<div class="modal fade" id="ajaxModel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="modelHeading">Create Role</h4>
-            </div>
-
-            <div class="modal-body">
-                {!! Form::open(array('route' => 'roles.store','method'=>'POST')) !!}
-                <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-12">
-                        <div class="form-group">
-                            <strong>Name:</strong>
-                            {!! Form::text('name', null, array('placeholder' => 'Name','class' => 'form-control')) !!}
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12">
-                        <div class="form-group">
-                            <strong>Permission:</strong>
-                            <br/>
-                            {!! Form::select('permission[]', $permission,[], array('class' => 'form-control','multiple')) !!}
-                            {{-- @foreach($permission as $value)
-                                <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }}
-                                {{ $value->name }}</label>
-                            <br/>
-                            @endforeach --}}
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                </div>
-                {!! Form::close() !!}
-            </div>
-        </div>
-    </div>
-</div>
+<div class="role-form"></div>
 
 @endsection
 
 @section('javascript')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
+
     <script>
         $(document).on('click','.create_role', function(){
-            $("#ajaxModel").modal("show");
+            $.get(
+                "{{ route("roles.create") }}",
+                function (data) {
+                    $('.role-form').html(data);
+                    $("#ajaxModel").modal("show");
+                    $('.select2-multiple').select2({
+                        width: "100%",
+                        placeholder: "Select",
+                        allowClear: true
+                    });
+                }
+            );
+        });
+
+        $(document).on('click','.edit_role', function(){
+            var role_id = $(this).data("id");
+            $.get(
+                "{{ route("roles.index") }}"+"/"+role_id+"/edit",
+                function (data) {
+                    $('.role-form').html(data);
+                    $("#ajaxModel").modal("show");
+                    $('.select2-multiple').select2({
+                        width: "100%",
+                        placeholder: "Select",
+                        allowClear: true
+                    });
+                }
+            );
         });
     </script>
 @endsection

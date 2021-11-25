@@ -25,9 +25,8 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        $permission = Permission::pluck('name','id')->all();
         $roles = Role::orderBy('id','DESC')->paginate(5);
-        return view('roles.index',compact('roles','permission'))
+        return view('roles.index',compact('roles'))
             ->with('i', ($request->input('page', 1) - 1) * 5);
     }
 
@@ -38,7 +37,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permission = Permission::get();
+        $permission = Permission::pluck('name','id')->all();
         return view('roles.create',compact('permission'));
     }
 
@@ -87,7 +86,7 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::find($id);
-        $permission = Permission::get();
+        $permission = Permission::pluck('name','id')->all();
         $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id",$id)
             ->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')
             ->all();
