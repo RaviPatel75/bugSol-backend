@@ -27,41 +27,13 @@
     @endif
 
 
-    <table class="table table-bordered">
+    <table class="table table-bordered data-table">
         <tr>
-            <th>No</th>
             <th>Name</th>
             <th>Email</th>
             <th>Roles</th>
             <th width="280px">Action</th>
         </tr>
-        @if (count($data) == '0')
-            <tr>
-                <td colspan="5">No record found</td>
-            </tr>
-        @else
-            @foreach ($data as $key => $user)
-                <tr>
-                    <td>{{ ++$i }}</td>
-                    <td>{{ $user->name }}</td>
-                    <td>{{ $user->email }}</td>
-                    <td>
-                        @if(!empty($user->getRoleNames()))
-                            @foreach($user->getRoleNames() as $v)
-                                <label class="badge badge-success">{{ $v }}</label>
-                            @endforeach
-                        @endif
-                    </td>
-                    <td>
-                        <a class="btn btn-info" href="{{ route('users.show',$user->id) }}">Show</a>
-                        <a class="btn btn-primary edit_user" href="javascript:void(0)" data-id="{{ $user->id }}">Edit</a>
-                        {!! Form::open(['method' => 'DELETE','route' => ['users.destroy', $user->id],'style'=>'display:inline']) !!}
-                        {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
-                        {!! Form::close() !!}
-                    </td>
-                </tr>
-            @endforeach
-        @endif
     </table>
 
 
@@ -75,6 +47,46 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
 
     <script>
+         $.ajaxSetup({
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        });
+        $(function(){
+            var table = $('.data-table').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: "{{ route('getUsers') }}",
+                columns: [
+                    { data: "name", name: "name" },
+                    { data: "email", name: "email" },
+                    { data: "role", name: "role " },
+                    {
+                        data: "action",
+                        name: "action",
+                        orderable: false,
+                        searchable: false,
+                    },
+                ],
+            });
+        });
+        $(document).on('click','.delete_user',function(){
+                var id = $(this).data('id');
+                if (confirm('Really delete?')) {
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            _method: 'DELETE'
+                        },
+                        url: "users/" + id,
+                        success: function (data) {
+                            location.reload();
+                        } 
+                    });
+                }
+            });
         $(document).on('click','.create_user', function(){
             $.get(
                 "{{ route("users.create") }}",

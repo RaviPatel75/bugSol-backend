@@ -37,13 +37,12 @@
 @endif
 
 
-<table class="table table-bordered">
+<table class="table table-bordered data-table">
   <tr>
-     <th>No</th>
      <th>Name</th>
      <th width="280px">Action</th>
   </tr>
-    @foreach ($roles as $key => $role)
+    {{-- @foreach ($roles as $key => $role)
     <tr>
         <td>{{ ++$i }}</td>
         <td>{{ $role->name }}</td>
@@ -59,7 +58,7 @@
             @endcan
         </td>
     </tr>
-    @endforeach
+    @endforeach --}}
 </table>
 
 
@@ -73,6 +72,45 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
 
     <script>
+        $.ajaxSetup({
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        });
+        $(function(){
+            var table = $('.data-table').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: "{{ route('roleList') }}",
+                columns: [
+                    { data: "name", name: "name" },
+                    {
+                        data: "action",
+                        name: "action",
+                        orderable: false,
+                        searchable: false,
+                    },
+                ],
+            });
+
+            $(document).on('click','.delete_role',function(){
+                var id = $(this).data('id');
+                if (confirm('Really delete?')) {
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            _method: 'DELETE'
+                        },
+                        url: "roles/" + id,
+                        success: function (data) {
+                            location.reload();
+                        } 
+                    });
+                }
+            });
+        });
         $(document).on('click','.create_role', function(){
             $.get(
                 "{{ route("roles.create") }}",

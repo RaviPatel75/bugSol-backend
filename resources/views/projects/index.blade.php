@@ -39,34 +39,13 @@
         </div>
     @endif
 
-    <table class="table table-bordered">
-        <tr>
-            <th>No</th>
-            <th>Name</th>
-            <th width="300px">Action</th>
-        </tr>
-	    @foreach ($projects as $project)
-	    <tr>
-	        <td>{{ ++$i }}</td>
-	        <td>{{ $project->name }}</td>
-	        <td>
-                <form action="{{ route('project.destroy',$project->id) }}" method="POST">
-                    <a class="btn btn-info" href="{{ route('project.show',$project->id) }}">Show</a>
-                    <a class="btn btn-info" href="{{ route('kanban.show',$project->id) }}">Kanban</a>
-                    @can('project-edit')
-                        <a class="btn btn-primary edit_project" href="javascript:void(0)" data-id="{{ $project->id }}">Edit</a>
-                    @endcan
-
-
-                    @csrf
-                    @method('DELETE')
-                    @can('project-delete')
-                        <button class="btn btn-danger">Delete</button>
-                    @endcan
-                </form>
-	        </td>
-	    </tr>
-	    @endforeach
+    <table class = "table table-bordered data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
     </table>
 
 
@@ -79,6 +58,44 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
 
     <script>
+         $.ajaxSetup({
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        });
+        $(function(){
+            var table = $('.data-table').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: "{{ route('getProject') }}",
+                columns: [
+                    { data: "name", name: "name" },
+                    {
+                        data: "action",
+                        name: "action",
+                        orderable: false,
+                        searchable: false,
+                    },
+                ],
+            });
+            $(document).on('click','.delete_project',function(){
+                var id = $(this).data('id');
+                if (confirm('Really delete?')) {
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            _method: 'DELETE'
+                        },
+                        url: "project/" + id,
+                        success: function (data) {
+                            location.reload();
+                        } 
+                    });
+                }
+            });
+        });
         $(document).on('click','.create_project', function(){
             $.get(
                 "{{ route("project.create") }}",

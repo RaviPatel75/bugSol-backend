@@ -11,6 +11,7 @@ use Hash;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Lang;
+use DataTables;
 
 class UserController extends Controller
 {
@@ -199,8 +200,47 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        User::find($id)->delete();
-        return redirect()->route('users.index')
-                        ->with('success',Lang::get('user.deleted'));
+        return User::find($id)->delete();
+        // return redirect()->route('users.index')
+        //                 ->with('success',Lang::get('user.deleted'));
+    }
+
+    public function getUsers(Request $request)
+    {
+        // dd("test");
+
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+        $userId = (Auth::user()->roles[0]->name != 'Super Admin') ? Auth::user()->id : '0';
+
+        if($request->ajax()) {
+            if ($isSuperAdmin) {
+                $data = User::orderBy('id','DESC')
+                        ->where('created_by','=',$userId)->get();
+            } else {
+                $data = User::orderBy('id','DESC')
+                            ->whereHas('roles', function ($query) {
+                                $query->where('name','!=', 'Super Admin');
+                            })
+                            ->where('created_by','=',$userId)->get();
+            }
+            return Datatables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('role', function($row){
+                        $badge = '';
+                        foreach($row->getRoleNames() as $ur)
+                        {
+                            $badge .= '<label class="badge badge-success">'.$ur.'</label>';
+                        }
+                        return $badge;
+                    })
+                    ->addColumn('action', function($row){
+                            $btn = '<a href="'.route("users.show",$row->id).'" data-toggle="tooltip" data-original-title="Show" class="btn btn-primary btn-sm ">Show</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm edit_user">Edit</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete_user">Delete</a>';
+                            return $btn;
+                    })
+                    ->rawColumns(['action','role'])
+                    ->make(true);
+        }
     }
 }

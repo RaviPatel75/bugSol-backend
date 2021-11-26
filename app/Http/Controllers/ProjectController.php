@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use DB;
 use Lang;
+use DataTables;
 
 class ProjectController extends Controller
 {
@@ -174,9 +175,27 @@ class ProjectController extends Controller
         $projectId = $project->id;
         $project->delete();
 
-        ProjectAccess::where('project_id',$projectId)->delete();
+        return ProjectAccess::where('project_id',$projectId)->delete();
     
-        return redirect()->route('project.index')
-                        ->with('success',Lang::get('project.deleted'));
+        // return redirect()->route('project.index')
+        //                 ->with('success',Lang::get('project.deleted'));
+    }
+
+    public function getProject(Request $request)
+    {
+        if($request->ajax()) {
+            $data = Project::latest()->get();
+            return Datatables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('action', function($row){
+                            $btn = '<a href="'.route("project.show",$row->id).'" data-toggle="tooltip" data-original-title="Show" class="btn btn-primary btn-sm " >Show</a>';
+                            $btn = $btn.' <a href="'.route("kanban.show",$row->id).'" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Kanban" class="btn btn-primary btn-sm">Kanban</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm edit_project">Edit</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete_project">Delete</a>';
+                            return $btn;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+        }
     }
 }
