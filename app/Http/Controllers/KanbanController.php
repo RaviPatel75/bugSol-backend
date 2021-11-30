@@ -63,6 +63,7 @@ class KanbanController extends Controller
         $project = Project::find($id);
 
         $kanbanData = [];
+
         $notStarted = Kanban::where('project_id','=',$id)
                     ->where('status','=','0')->get();
         $inProgress = Kanban::where('project_id','=',$id)

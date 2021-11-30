@@ -72,7 +72,7 @@ class ProjectController extends Controller
                 'project_id' => $projectId,
                 'user_id' => $assignUser
             ];
-
+          
             ProjectAccess::create($projectAccessData);
 
             unset($projectAccessData);
@@ -113,6 +113,7 @@ class ProjectController extends Controller
         } else {
             $users = User::where('created_by','=',Auth::user()->id)->pluck('name','id');
         }
+
         $assignedUsers = ProjectAccess::leftjoin('users',function($join) {
                                     $join->on('project_access.user_id','=','users.id');
                                 })

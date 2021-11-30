@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Lang;
 use DataTables;
 
+
 class UserController extends Controller
 {
     function __construct()

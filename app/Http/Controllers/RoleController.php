@@ -10,6 +10,7 @@ use DB;
 use Lang;
 use DataTables;
 
+
 class RoleController extends Controller
 {
     function __construct()
