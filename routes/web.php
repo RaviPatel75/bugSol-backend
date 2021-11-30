@@ -45,3 +45,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/getUsers', [UserController::class, 'getUsers'])->name('getUsers');
     Route::get('/roleList', [RoleController::class, 'roleList'])->name('roleList');
 });
+
+// Route::get('/test', function() {
+//     return view('layouts');
+// });
