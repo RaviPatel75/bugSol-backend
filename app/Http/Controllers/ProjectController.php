@@ -7,8 +7,9 @@ use App\Models\ProjectAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-// use App\Http\Controllers\DB;
 use DB;
+use Lang;
+use DataTables;
 
 class ProjectController extends Controller
 {
@@ -39,7 +40,12 @@ class ProjectController extends Controller
     public function create()
     {
         $userId = Auth::user()->id;
-        $users = User::where('created_by','=',$userId)->pluck('name','id');
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+        if ($isSuperAdmin) {
+            $users = User::pluck('name','id')->all();
+        } else {
+            $users = User::where('created_by','=',$userId)->pluck('name','id');
+        }
         return view('projects.create',compact('users'));
     }
 
@@ -62,18 +68,18 @@ class ProjectController extends Controller
 
         foreach($usersAssigned as $assignUser)
         {
-            $projectAccessData = array(
+            $projectAccessData = [
                 'project_id' => $projectId,
                 'user_id' => $assignUser
-            );
-
+            ];
+          
             ProjectAccess::create($projectAccessData);
 
             unset($projectAccessData);
         }
 
         return redirect()->route('project.index')
-                        ->with('success','Project created successfully.');
+                        ->with('success',Lang::get('project.password'));
     }
 
     /**
@@ -101,13 +107,26 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        $users = User::where('created_by','=',Auth::user()->id)->pluck('name','id');
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+        if ($isSuperAdmin) {
+            $users = User::pluck('name','id')->all();
+        } else {
+            $users = User::where('created_by','=',Auth::user()->id)->pluck('name','id');
+        }
+
         $assignedUsers = ProjectAccess::leftjoin('users',function($join) {
                                     $join->on('project_access.user_id','=','users.id');
                                 })
                                 ->where('project_access.project_id','=',$project->id)
                                 ->pluck('users.id');
 
+        $response_data = [
+            'project' => $project,
+            'users' => $users,
+            'assignedUsers' => $assignedUsers
+        ];
+
+        // return response()->json($response_data);
         return view('projects.edit',compact('project','users','assignedUsers'));
     }
 
@@ -132,10 +151,10 @@ class ProjectController extends Controller
 
         foreach($usersAssigned as $assignUser)
         {
-            $projectAccessData = array(
+            $projectAccessData = [
                 'project_id' => $projectId,
                 'user_id' => $assignUser
-            );
+            ];
 
             ProjectAccess::create($projectAccessData);
 
@@ -143,7 +162,7 @@ class ProjectController extends Controller
         }
     
         return redirect()->route('project.index')
-                        ->with('success','Project updated successfully');
+                        ->with('success',Lang::get('project.update'));
     }
 
     /**
@@ -157,9 +176,27 @@ class ProjectController extends Controller
         $projectId = $project->id;
         $project->delete();
 
-        ProjectAccess::where('project_id',$projectId)->delete();
+        return ProjectAccess::where('project_id',$projectId)->delete();
     
-        return redirect()->route('project.index')
-                        ->with('success','Project deleted successfully');
+        // return redirect()->route('project.index')
+        //                 ->with('success',Lang::get('project.deleted'));
+    }
+
+    public function getProject(Request $request)
+    {
+        if($request->ajax()) {
+            $data = Project::latest()->get();
+            return Datatables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('action', function($row){
+                            $btn = '<a href="'.route("project.show",$row->id).'" data-toggle="tooltip" data-original-title="Show" class="btn btn-primary btn-sm " >Show</a>';
+                            $btn = $btn.' <a href="'.route("kanban.show",$row->id).'" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Kanban" class="btn btn-primary btn-sm">Kanban</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm edit_project">Edit</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete_project">Delete</a>';
+                            return $btn;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+        }
     }
 }

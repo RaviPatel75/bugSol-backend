@@ -42,6 +42,7 @@
 
         .task-grid th:first-child {
             border-left: 1px;
+            width: 200px;
         }
 
         .task-grid tr:last-child {
@@ -236,17 +237,6 @@
 
 
 </div>
-{{-- <div class="test">
-    <div class="completed">
-        <div>
-            Drag here to mark items completed
-        </div>
-        <div></div>
-    </div>
-    <div class="delete-container">
-        Drag here to delete task
-    </div>
-</div> --}}
 
 <div class="modal fade" id="ajaxModel" aria-hidden="true">
     <div class="modal-dialog">
@@ -318,7 +308,7 @@
                     type: "POST",
                     dataType: "json",
                     success: function(data) {
-
+                        alert(data.success);
                     }
                 });
             },
