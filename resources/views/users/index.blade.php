@@ -173,7 +173,6 @@
         </div>
     </div> --}}
 
-
     @if ($message = Session::get('success'))
         <div class="alert alert-success">
             <p>{{ $message }}</p>
@@ -198,7 +197,6 @@
 @endsection
 
 @section('javascript')
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
     <script>
          $.ajaxSetup({
