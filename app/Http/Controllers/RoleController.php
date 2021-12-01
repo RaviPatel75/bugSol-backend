@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
+use Lang;
+use DataTables;
+
 
 class RoleController extends Controller
 {
@@ -36,7 +39,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permission = Permission::get();
+        $permission = Permission::pluck('name','id')->all();
         return view('roles.create',compact('permission'));
     }
 
@@ -57,7 +60,7 @@ class RoleController extends Controller
         $role->syncPermissions($request->input('permission'));
     
         return redirect()->route('roles.index')
-                        ->with('success','Role created successfully');
+                        ->with('success',Lang::get('role.created'));
     }
 
     /**
@@ -85,7 +88,7 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::find($id);
-        $permission = Permission::get();
+        $permission = Permission::pluck('name','id')->all();
         $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id",$id)
             ->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')
             ->all();
@@ -114,7 +117,7 @@ class RoleController extends Controller
         $role->syncPermissions($request->input('permission'));
     
         return redirect()->route('roles.index')
-                        ->with('success','Role updated successfully');
+                        ->with('success',Lang::get('role.updated'));
     }
 
     /**
@@ -125,8 +128,25 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        DB::table("roles")->where('id',$id)->delete();
-        return redirect()->route('roles.index')
-                        ->with('success','Role deleted successfully');
+        return DB::table("roles")->where('id',$id)->delete();
+        // return redirect()->route('roles.index')
+        //                 ->with('success',Lang::get('role.deleted'));
+    }
+
+    public function roleList(Request $request)
+    {
+        if($request->ajax()) {
+            $data = Role::orderBy('id','DESC');
+            return Datatables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('action', function($row){
+                            $btn = '<a href="'.route("roles.show",$row->id).'" data-toggle="tooltip" data-original-title="Show" class="btn btn-primary btn-sm " >Show</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm edit_role">Edit</a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete_role">Delete</a>';
+                            return $btn;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+        }
     }
 }

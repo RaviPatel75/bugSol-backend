@@ -21,9 +21,10 @@ use App\Http\Controllers\KanbanController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+Route::get('/', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm']);
 
 Auth::routes();
 
@@ -39,4 +40,8 @@ Route::group(['middleware' => ['auth']], function() {
     // Kanban routes
     Route::resource('kanban', KanbanController::class);
     Route::post('/changeStatus', [KanbanController::class, 'updateStatus'])->name('updateStatus');
+
+    Route::get('/getProject', [ProjectController::class, 'getProject'])->name('getProject');
+    Route::get('/getUsers', [UserController::class, 'getUsers'])->name('getUsers');
+    Route::get('/roleList', [RoleController::class, 'roleList'])->name('roleList');
 });

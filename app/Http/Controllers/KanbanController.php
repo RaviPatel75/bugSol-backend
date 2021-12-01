@@ -9,6 +9,7 @@ use App\Models\ProjectAccess;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Kanban;
+use Lang;
 
 class KanbanController extends Controller
 {
@@ -48,8 +49,7 @@ class KanbanController extends Controller
 
         $createTask = Kanban::create($request->all());
 
-        // dd($request->status);   
-        return response()->json(['success'=>'Product saved successfully.']);
+        return response()->json(['success'=>Lang::get('kanban.task_added')]);
     }
 
     /**
@@ -61,7 +61,9 @@ class KanbanController extends Controller
     public function show($id)
     {
         $project = Project::find($id);
-        $kanbanData = array();
+
+        $kanbanData = [];
+
         $notStarted = Kanban::where('project_id','=',$id)
                     ->where('status','=','0')->get();
         $inProgress = Kanban::where('project_id','=',$id)
@@ -71,12 +73,12 @@ class KanbanController extends Controller
         $completed = Kanban::where('project_id','=',$id)
                     ->where('status','=','3')->get();
         
-        $kanbanData = array(
+        $kanbanData = [
             'notStarted' => $notStarted,
             'inProgress' => $inProgress,
             'unitTesting' => $unitTesting,
             'completed' => $completed
-        );
+        ];
 
         return view('kanban.index', compact('kanbanData'));
     }
@@ -122,13 +124,10 @@ class KanbanController extends Controller
         $taskDetail->status = $request->current;
         $res = $taskDetail->save();
 
-        if ($res)
-        {
-            return response()->json(['success'=>'Product saved successfully.']);
-        }
-        else
-        {
-            return response()->json(['error'=>'Error accured in Saving.']);
+        if ($res) {
+            return response()->json(['success'=>Lang::get('kanban.update_success')]);
+        } else {
+            return response()->json(['error'=>Lang::get('kanban.update_error')]);
         }
     }
 }
