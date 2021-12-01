@@ -111,7 +111,7 @@
                             <h3 class="mb-0">Users</h3>
                         </div>
                         <div class="col-4 text-right">
-                            <a href="" class="btn btn-sm btn-primary">Add user</a>
+                            <a href="javascript:void(0)" class="btn btn-sm btn-primary create_user">Add user</a>
                         </div>
                     </div>
                 </div>
@@ -198,8 +198,8 @@
 @endsection
 
 @section('javascript')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
     <script>
          $.ajaxSetup({
             headers: {

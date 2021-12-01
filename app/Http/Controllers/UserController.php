@@ -208,8 +208,7 @@ class UserController extends Controller
 
     public function getUsers(Request $request)
     {
-        // dd("test");
-
+        
         $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
         $userId = (Auth::user()->roles[0]->name != 'Super Admin') ? Auth::user()->id : '0';
 
@@ -235,9 +234,9 @@ class UserController extends Controller
                         return $badge;
                     })
                     ->addColumn('action', function($row){
-                            $btn = '<a href="'.route("users.show",$row->id).'" data-toggle="tooltip" data-original-title="Show" class="btn btn-primary btn-sm ">Show</a>';
-                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm edit_user">Edit</a>';
-                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete_user">Delete</a>';
+                            $btn = '<a href="'.route("users.show",$row->id).'" data-toggle="tooltip" data-original-title="Show" class="btn btn-primary btn-sm "><i class="fa fa-eye"></i></a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm edit_user"><i class="fa fa-edit"></i></a>';
+                            $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete_user"><i class="fa fa-trash"></i></a>';
                             return $btn;
                     })
                     ->rawColumns(['action','role'])
