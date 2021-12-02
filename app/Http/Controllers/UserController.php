@@ -116,8 +116,35 @@ class UserController extends Controller
      */
     public function show($id)
     {
+        $isSuperAdmin = (Auth::user()->roles[0]->name == 'Super Admin') ? true : false;
+
+        if ($isSuperAdmin) {
+            $data = User::orderBy('id','DESC')->paginate(5);
+        } else {
+            $data = User::orderBy('id','DESC')
+                        ->whereHas('roles', function ($query) {
+                            $query->where('name','!=', 'Super Admin');
+                        })
+                        ->paginate(5);
+        }
+        
         $user = User::find($id);
-        return view('users.show',compact('user'));
+        $hasPermission = Auth::user()->hasPermissionTo('user-edit');
+
+        if ($hasPermission && $isSuperAdmin) {
+            $roles = Role::pluck('name','name')->all();
+        } else {
+            $roles = array();
+            $rolesQueryData = Role::where('name','!=', 'Super Admin')->get();
+            foreach($rolesQueryData as $data)
+            {
+                $roles[$data->name] = $data->name;
+            }
+        }
+
+        $userRole = $user->roles->pluck('name','name')->all();
+
+        return view('users.show',compact('user','roles','userRole'));
     }
 
     /**
@@ -233,7 +260,7 @@ class UserController extends Controller
                         return $badge;
                     })
                     ->addColumn('action', function($row){
-                            $btn = '<a href="'.route("users.show",$row->id).'" data-toggle="tooltip" data-original-title="Show" class="btn btn-primary btn-sm "><i class="fa fa-eye"></i></a>';
+                            $btn = '<a href="javascript:void(0)" data-toggle="tooltip" data-original-title="Show" data-id="'.$row->id.'" class="btn btn-primary btn-sm view_user"><i class="fa fa-eye"></i></a>';
                             $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm edit_user"><i class="fa fa-edit"></i></a>';
                             $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm delete_user"><i class="fa fa-trash"></i></a>';
 
